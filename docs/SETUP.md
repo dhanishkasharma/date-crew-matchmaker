@@ -33,7 +33,7 @@ Production requires your Atlas URI and does not start a local development databa
 3. Copy the key into `GEMINI_API_KEY` in your local `.env`. Do not paste it into the browser UI, chat, or source code.
 4. Check the project's model access and rate limits in AI Studio. Use a text model listed as available on its free tier. The app defaults to `gemini-3.8-flash`, which passed the live connection check; change `GEMINI_MODEL` if your project requires another supported text model. A model may remain listed but return a not-found error when used; test generation rather than relying on the listing alone.
 5. Keep the project on its free tier for this assessment. Free usage is limited by quota, not a promised cash-credit balance. Availability and limits depend on model, account, and region. A paid billing upgrade is not required for eligible free-tier use.
-6. Restart the backend after changing `.env`. Open an eligible match, click **Send match**, then **Generate with Gemini**. The draft is labeled **Gemini AI draft** only after a successful API response. Missing keys, errors, and quota exhaustion produce an explicitly labeled template.
+6. Restart the backend after changing `.env`. Open an eligible match, click **Draft introduction**, then **Generate with Gemini**. The draft is labeled **Gemini draft** only after a successful API response. Missing keys, errors, and quota exhaustion produce an explicitly labeled template.
 
 Official references: [API keys](https://ai.google.dev/gemini-api/docs/api-key), [pricing and eligible free models](https://ai.google.dev/gemini-api/docs/pricing), [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits).
 
@@ -71,6 +71,6 @@ rtk npm run build
 rtk npm run test:e2e
 ```
 
-## 4. Hosting later
+## 4. Render and Vercel hosting
 
-Build with `npm run build`, start with `npm start`, and configure `NODE_ENV=production`, `MONGODB_URI`, `SESSION_SECRET` (at least 32 random characters), `APP_ORIGIN` (exact HTTPS origin), `GEMINI_API_KEY`, and `GEMINI_MODEL` on a Node-compatible host. Express serves the built React app from one origin. Allow the backend host's egress IPs in Atlas. HTTPS is required for secure production session cookies. No hosting account is provisioned by this local build.
+Build with `npm run build`, start with `npm start`, and configure `NODE_ENV=production`, `MONGODB_URI`, `SESSION_SECRET` (at least 32 random characters), `APP_ORIGIN` (exact HTTPS origin), `GEMINI_API_KEY`, and `GEMINI_MODEL` on a Node-compatible host. Express serves the built React app from one origin. Allow the backend host's egress IPs in Atlas. HTTPS is required for secure production session cookies. See [the deployment guide](DEPLOYMENT.md) for the Render API and Vercel frontend configuration.

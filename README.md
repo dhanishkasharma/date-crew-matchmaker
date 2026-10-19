@@ -4,6 +4,14 @@ A polished MERN assessment MVP for customer care, explainable shortlists, meetin
 
 ![Matchmaker workspace dashboard](docs/screenshots/dashboard.png)
 
+## Deployment
+
+- Frontend: [date-crew-matchmaker.vercel.app](https://date-crew-matchmaker.vercel.app)
+- API: [date-crew-matchmaker-api.onrender.com/api/health](https://date-crew-matchmaker-api.onrender.com/api/health)
+- Source: [dhanishkasharma/date-crew-matchmaker](https://github.com/dhanishkasharma/date-crew-matchmaker)
+
+The frontend is deployed. API verification is pending the Atlas network allowlist update for Render. See [deployment instructions](docs/DEPLOYMENT.md).
+
 ## Run
 
 ```powershell
@@ -47,6 +55,7 @@ rtk npm run build
 - [Architecture and deliberate tradeoffs](docs/ARCHITECTURE.md)
 - [Product research](docs/RESEARCH.md)
 - [Interface direction and design decisions](docs/UI-DESIGN.md)
+- [Render and Vercel deployment](docs/DEPLOYMENT.md)
 
 ## Five-minute demo
 
@@ -60,7 +69,7 @@ rtk npm run build
 
 ## Current external setup
 
-Credentials are supplied privately through the ignored local `.env`. MongoDB and live Gemini introductions have been verified with that configuration. Credentials are never bundled in the repository. GitHub publication and hosting remain pending. The app never sends a real email. Verification is simulated. Real personal data and production onboarding need additional operational controls beyond this assessment.
+Credentials are supplied privately through the ignored local `.env`. MongoDB and live Gemini introductions have been verified with that configuration. Credentials are never bundled in the repository. The repository is published and the Vercel frontend is deployed. The Render API is configured; its first startup is awaiting Atlas network access. The app never sends a real email. Verification is simulated. Real personal data and production onboarding need additional operational controls beyond this assessment.
 
 ## Validation on 19 October 2026
 
