@@ -35,9 +35,17 @@ Set `APP_ORIGIN` to the exact Vercel production HTTPS origin. Use a fresh, rando
 
 `vercel.json` sends `/api/*` to the Render service and serves `index.html` for frontend routes. It disables caching for API proxy responses. If either production domain changes, update the rewrite destination or Render's `APP_ORIGIN` accordingly.
 
-## Current Atlas prerequisite
+## Atlas network access
 
-The first Render build succeeded, but startup failed with a MongoDB server-selection error. The service reports these outbound ranges: `74.220.49.0/24` and `74.220.57.0/24`. Add them to the Atlas project network access list, then restart or manually deploy the API. Verify health and login before sharing the demo as fully working.
+Render uses these outbound ranges: `74.220.49.0/24` and `74.220.57.0/24`. The Atlas allowlist was updated for those ranges and the API was successfully redeployed. Preserve this access for the running demo; recheck the service’s Connect menu if its region changes.
+
+## Verified production URLs
+
+- [Live application](https://date-crew-matchmaker.vercel.app)
+- [API health](https://date-crew-matchmaker-api.onrender.com/api/health)
+- [GitHub source](https://github.com/dhanishkasharma/date-crew-matchmaker)
+
+Verified on 19 October 2026: direct/proxied health, both demo logins, secure cookie attributes, session persistence after browser refresh, 10/2 customer assignment lists, the 200-profile pool, a 404 for cross-owner customer access, and a live Gemini draft. One initial Gemini 504 timeout exercised the labeled template fallback; a subsequent request succeeded. No real email was sent.
 
 ## Verify after deployment
 

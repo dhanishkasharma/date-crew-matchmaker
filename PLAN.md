@@ -1,6 +1,6 @@
 # TDC Matchmaker Dashboard — MVP implementation plan
 
-Status: local MVP implemented on 19 October 2026 in C:\Users\saara\Matchmaker. Approved stack: MERN + TypeScript + Gemini free-tier API. Login, dashboard, full profiles, preferences, matching, notes, and mock introductions are implemented. Configured MongoDB access and live Gemini introductions with gemini-3.8-flash are verified. External publication remains pending. See README.md for validation evidence and docs/SETUP.md for account configuration.
+Status: local MVP implemented on 19 October 2026 in C:\Users\saara\Matchmaker. Approved stack: MERN + TypeScript + Gemini free-tier API. Login, dashboard, full profiles, preferences, matching, notes, and mock introductions are implemented. Configured MongoDB access and live Gemini introductions with gemini-3.8-flash are verified. GitHub publication, the Vercel frontend and the Render API are complete; public login, session refresh, assignment isolation, Atlas connectivity and live Gemini drafting are verified. See docs/DEPLOYMENT.md for the live URLs. See README.md for validation evidence and docs/SETUP.md for account configuration.
 
 ## Approved stack decisions
 
@@ -79,7 +79,7 @@ Use a restrained TDC identity, a short explanation of the tool, labeled username
 
 ### Customer workspace
 
-Use a persistent customer summary and three focused areas: Profile, Matches, and Notes & Activity. On a wide screen, show profile context beside the shortlist; on a narrow screen, stack the content.
+Use a persistent customer brief and three focused areas: Profile, Matches, and Notes & Activity. Keep life-plan criteria above the shortlist; use comparable candidate cards on wide screens and stack the content on narrow screens.
 
 - Group biodata into personal/contact, education/career, family/cultural background, lifestyle, and partner preferences.
 - Display unavailable values as “Not provided”; retain explicit Yes / No / Maybe choices.

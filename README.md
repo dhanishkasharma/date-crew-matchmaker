@@ -2,7 +2,7 @@
 
 A polished MERN assessment MVP for customer care, explainable shortlists, meeting notes, and reviewed introductions.
 
-![Matchmaker workspace dashboard](docs/screenshots/dashboard.png)
+![Hosted matchmaker workspace](docs/screenshots/live-dashboard.png)
 
 ## Deployment
 
@@ -10,7 +10,7 @@ A polished MERN assessment MVP for customer care, explainable shortlists, meetin
 - API: [date-crew-matchmaker-api.onrender.com/api/health](https://date-crew-matchmaker-api.onrender.com/api/health)
 - Source: [dhanishkasharma/date-crew-matchmaker](https://github.com/dhanishkasharma/date-crew-matchmaker)
 
-The frontend is deployed. API verification is pending the Atlas network allowlist update for Render. See [deployment instructions](docs/DEPLOYMENT.md).
+The frontend and API are live. Production login, session refresh, assignment isolation, Atlas data and Gemini draft generation have been verified. See [deployment instructions](docs/DEPLOYMENT.md).
 
 ## Run
 
@@ -69,7 +69,7 @@ rtk npm run build
 
 ## Current external setup
 
-Credentials are supplied privately through the ignored local `.env`. MongoDB and live Gemini introductions have been verified with that configuration. Credentials are never bundled in the repository. The repository is published and the Vercel frontend is deployed. The Render API is configured; its first startup is awaiting Atlas network access. The app never sends a real email. Verification is simulated. Real personal data and production onboarding need additional operational controls beyond this assessment.
+Credentials are supplied privately through the ignored local `.env`. MongoDB and live Gemini introductions have been verified with that configuration. Credentials are never bundled in the repository. The repository, Vercel frontend and Render API are published. Atlas connectivity and live Gemini drafting have been verified through the public app. The app never sends a real email. Verification is simulated. Real personal data and production onboarding need additional operational controls beyond this assessment.
 
 ## Validation on 19 October 2026
 
@@ -78,3 +78,9 @@ Credentials are supplied privately through the ignored local `.env`. MongoDB and
 With the app running, `npm run check:services` repeats the end-to-end connection check, including one live introduction request. `npm run check:gemini` makes a small provider check. Both commands omit secrets from their output; generation uses your project's quota.
 
 The interface revision uses the selected ivory and plum palette, Newsreader profile headings and DM Sans controls. A customer brief keeps life-plan criteria visible above the shortlist. Candidate cards separate profile facts, compatibility evidence, score details and the introduction action. The introduction editor is a separate component, with visible template/Gemini states and an explicit mock-send step. Desktop and 390px mobile layouts were reviewed; live Gemini generation was also verified in the editor.
+
+### Production verification
+
+The public Vercel app was verified against the Render API and Atlas on 19 October 2026: health returned HTTP 200, Priya received 10 customers, Rohan received 2, both saw the 200-profile pool, and Rohan’s request for Priya’s customer returned 404. Session cookies were HttpOnly, Secure and SameSite=Lax; authenticated API responses used no-store. A browser refresh retained login and the direct customer route. Live Gemini generation succeeded after one transient provider timeout, which correctly displayed the template fallback. The generated draft was reviewed and cancelled without sending.
+
+![Live Gemini introduction](docs/screenshots/live-introduction.png)
