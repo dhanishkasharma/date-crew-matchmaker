@@ -5,6 +5,9 @@ import { Avatar, Empty, Modal, Verified } from "./components";
 import { fullName } from "./format";
 import { ProfileDetails } from "./ProfileDetails";
 import { IntroductionDialog } from "./IntroductionDialog";
+import type { ShortlistReview } from "../shared/ai";
+import { ShortlistReviewPanel } from "./ShortlistReview";
+import { post } from "./api";
 
 export function CandidateDialog({
   profile,
@@ -46,10 +49,55 @@ export function MatchCards({
   const [candidate, setCandidate] = useState<Profile | null>(null),
     [sending, setSending] = useState<Match | null>(null),
     [limit, setLimit] = useState(6),
-    [highOnly, setHighOnly] = useState(false);
-  const matches = highOnly
-    ? report.matches.filter((m) => m.band === "High potential")
+    [highOnly, setHighOnly] = useState(false),
+    [reviewState, setReviewState] = useState<{
+      context: string;
+      value: ShortlistReview;
+    } | null>(null),
+    [reviewBusy, setReviewBusy] = useState(false),
+    [reviewError, setReviewError] = useState(""),
+    [aiOrder, setAiOrder] = useState(false);
+  const context = JSON.stringify([
+    customer.profile,
+    report.matches.slice(0, 8),
+  ]);
+  const review = reviewState?.context === context ? reviewState.value : null;
+  const reviewedIds =
+    aiOrder && review?.source === "ai"
+      ? review.items.map((item) => item.candidateId)
+      : [];
+  const ordered = reviewedIds.length
+    ? [
+        ...reviewedIds.map((id) =>
+          report.matches.find((match) => match.candidate.id === id)!,
+        ),
+        ...report.matches.filter(
+          (match) => !reviewedIds.includes(match.candidate.id),
+        ),
+      ]
     : report.matches;
+  const matches = highOnly
+    ? ordered.filter((m) => m.band === "High potential")
+    : ordered;
+  async function generateReview() {
+    setReviewBusy(true);
+    setReviewError("");
+    try {
+      const value = await post<ShortlistReview>(
+        `/customers/${customer.id}/shortlist-review`,
+        {},
+      );
+      setReviewState({ context, value });
+    } catch (error) {
+      setReviewError(
+        error instanceof Error
+          ? error.message
+          : "AI could not review the shortlist. Try again.",
+      );
+    } finally {
+      setReviewBusy(false);
+    }
+  }
   const canSend =
     customer.profile.verified &&
     !["Paused", "Closed", "Onboarding"].includes(customer.stage);
@@ -75,6 +123,19 @@ export function MatchCards({
           High potential only
         </label>
       </div>
+      <ShortlistReviewPanel
+        report={report}
+        review={review}
+        busy={reviewBusy}
+        error={reviewError}
+        configured={aiConfigured}
+        aiOrder={aiOrder}
+        generate={() => void generateReview()}
+        changeOrder={(value) => {
+          setAiOrder(value);
+          setLimit(6);
+        }}
+      />
       {!canSend && (
         <p className="inline-notice">
           Introductions are paused. Review this customer’s verification and
@@ -112,7 +173,7 @@ export function MatchCards({
       </details>
       {matches.length ? (
         <div className="match-list">
-          {matches.slice(0, limit).map((match, index) => {
+          {matches.slice(0, limit).map((match) => {
             const p = match.candidate,
               wasSent = sends.some((s) => s.candidateId === p.id);
             return (
@@ -123,7 +184,11 @@ export function MatchCards({
                   >
                     {match.band}
                   </span>
-                  <span className="match-position">Rank {index + 1}</span>
+                  <span className="match-position">
+                    {reviewedIds.includes(p.id)
+                      ? `AI review ${reviewedIds.indexOf(p.id) + 1}`
+                      : `Rank ${report.matches.findIndex((item) => item.candidate.id === p.id) + 1}`}
+                  </span>
                 </div>
                 <div className="match-person">
                   <Avatar name={fullName(p)} id={p.id} large />
@@ -211,7 +276,7 @@ export function MatchCards({
                     disabled={wasSent || !canSend}
                     onClick={() => setSending(match)}
                   >
-                    {wasSent ? "Match sent" : "Draft introduction"}
+                    {wasSent ? "Match sent" : "Send Match"}
                   </button>
                 </div>
               </article>

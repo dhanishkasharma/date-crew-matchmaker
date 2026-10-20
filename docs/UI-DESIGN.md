@@ -33,7 +33,9 @@ Navigation | Customer name + career                   Journey stage
            | Biodata / Draft intro  | Biodata / Draft intro
 ```
 
-Draft introduction opens an editable preview with a prominent Generate with Gemini action. Matchmaking decisions and sending remain with the matchmaker. Real AI and template states remain visibly distinct.
+Send Match opens an editable preview with a prominent Generate with AI action. Matchmaking decisions and sending remain with the matchmaker. Real AI and template states remain visibly distinct. The visible brand is The Date Crew.
+
+The AI shortlist review is a quiet, plum-edged panel above the candidate cards. Its ordered review list opens a comparison of the customer's and candidate's saved facts, alongside a clearly labeled AI interpretation. Mutual-fit and AI review orders are explicitly selectable. The preference editor offers Manual preferences and Describe with AI modes; the latter shows a before/after change list, quoted request fragments and eligible-pool impact before Apply. Neither flow adds a generic chat screen or decorative AI iconography.
 
 ## Critique
 

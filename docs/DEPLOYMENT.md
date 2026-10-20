@@ -7,7 +7,7 @@ The repository is [dhanishkasharma/date-crew-matchmaker](https://github.com/dhan
 ```text
 Browser → Vercel React frontend
         → /api/* rewrite → Render Express API → MongoDB Atlas
-                                             → Gemini (draft requests only)
+                                             → Gemini (review, preference preview, drafts)
 ```
 
 The frontend calls relative `/api` URLs. Vercel proxies those requests to Render, preserving a single browser origin for session cookies. Keep the `HttpOnly`, `Secure`, `SameSite=Lax` session cookie; cross-site cookies and broad CORS access are unnecessary. API responses must not be cached.
@@ -51,9 +51,14 @@ Verified on 19 October 2026: direct/proxied health, both demo logins, secure coo
 
 1. Confirm `/api/health` returns `{ "ok": true }` through Vercel.
 2. Sign in with `priya / TdcDemo2026!`, then refresh to verify the session persists.
-3. Open Ananya's suggested matches and generate a Gemini introduction. Confirm the source reads Gemini draft; cancel without sending.
+3. Open Ananya's suggested matches, review the shortlist with AI, then open Send Match and Generate with AI. Confirm the source reads AI draft; cancel without sending. A provider failure must keep the rules/template path usable and labeled honestly.
 4. Confirm direct links to customer routes load the app.
 5. Sign in as Rohan to verify assignment isolation if testing authorization changes.
+6. Open partner preferences → Describe with AI. Preview a request, verify that nothing saved yet, and inspect the proposed changes and counts. Cancel to preserve the demo, or explicitly Apply when testing persistence.
+
+The 20 October enhancement release needs no new environment variables or database collections. Existing legacy demo text can be updated explicitly with `npm run demo:refresh-text` (dry run) and `npm run demo:refresh-text -- --apply`. This replaces only known legacy bio/career text on known seeded profile IDs; it never resets notes, sends or preferences. It does not run on application startup. In-memory AI previews expire on restart and must be regenerated.
+
+The explicit legacy-text migration was applied to the configured Atlas database on 20 October: 424 legacy text fields were replaced across the 212 seeded profiles. Operational records and preferences were preserved. Set the existing `GEMINI_MODEL` environment variable to `gemini-3.5-flash-lite` for the enhancement release; the same existing key is used.
 
 Render's free service can spin down when idle, so the first request may be slow. Data and sessions remain in Atlas. All customer profiles and sends in this assessment are fictional or simulated.
 

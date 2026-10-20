@@ -52,7 +52,7 @@ export function Login({ onLogin }: { onLogin: () => Promise<void> }) {
             </div>
           </div>
         </div>
-        <span className="login-story-footer">The Dating Company</span>
+        <span className="login-story-footer">The Date Crew</span>
       </section>
       <main className="login-form-panel">
         <div className="login-form-wrap">

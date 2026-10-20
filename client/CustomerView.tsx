@@ -111,7 +111,7 @@ function Notes({
                 </p>
                 <small>
                   {event.kind === "send"
-                    ? `${event.source === "gemini" ? "Gemini AI draft" : event.source === "edited" ? "Reviewed and edited draft" : "Template draft"} · ${event.policyVersion}`
+                    ? `${event.source === "gemini" ? "AI draft" : event.source === "edited" ? "Reviewed and edited draft" : "Template draft"} · ${event.policyVersion}`
                     : event.author}
                 </small>
               </div>
@@ -303,6 +303,7 @@ export function CustomerView({
         <PreferencesEditor
           key={customer.id}
           customer={customer}
+          aiConfigured={data.aiConfigured}
           close={() => setPreferencesOpen(false)}
           saved={async () => {
             await reload();

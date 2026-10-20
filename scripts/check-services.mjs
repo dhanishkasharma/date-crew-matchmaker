@@ -35,7 +35,7 @@ try {
       customers: workspace.customers.length,
       candidates: workspace.candidates.length,
       geminiKeyConfigured: workspace.aiConfigured,
-      model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+      model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
     }),
   );
   const report = await request("/customers/customer-1/matches");

@@ -35,6 +35,13 @@ import {
   scorePair,
 } from "../shared/matching";
 import { generateIntroduction } from "./introductions";
+import { reviewShortlist } from "./shortlist-review";
+import {
+  getPreferenceProposal,
+  preferenceSnapshot,
+  proposePreferences,
+  removePreferenceProposal,
+} from "./preference-assistant";
 
 declare module "express-session" {
   interface SessionData {
@@ -116,7 +123,7 @@ export function createApp() {
     keyGenerator: (req) => req.session.userId!,
     standardHeaders: "draft-8",
     legacyHeaders: false,
-    message: { error: "Introduction limit reached. Try again in 10 minutes." },
+    message: { error: "AI request limit reached. Try again in 10 minutes." },
   });
   const publicUser = (user: {
     _id: unknown;
@@ -308,6 +315,78 @@ export function createApp() {
       ),
     );
   });
+  const candidatePool = async () =>
+    (
+      await ProfileModel.find({ kind: "candidate" }).sort({ _id: 1 }).lean()
+    ).map((p) => profileSchema.parse(p.data));
+  app.post("/api/customers/:id/shortlist-review", aiLimit, async (req, res) => {
+    const customer = await ownCustomer(req);
+    const pool = await candidatePool();
+    res.json(
+      await reviewShortlist(
+        req.session.userId!,
+        customer.id,
+        customer.profile,
+        rankMatches(customer.profile, pool),
+      ),
+    );
+  });
+  app.post(
+    "/api/customers/:id/preference-proposals",
+    aiLimit,
+    async (req, res) => {
+      const customer = await ownCustomer(req);
+      const { text } = z
+        .object({ text: z.string().trim().min(8).max(1500) })
+        .strict()
+        .parse(req.body);
+      const pool = await candidatePool();
+      res.json(
+        await proposePreferences(req.session.userId!, customer, pool, text),
+      );
+    },
+  );
+  app.post(
+    "/api/customers/:id/preference-proposals/:proposalId/apply",
+    async (req, res) => {
+      const customer = await ownCustomer(req);
+      const id = String(req.params.proposalId);
+      const proposal = getPreferenceProposal(
+        id,
+        req.session.userId!,
+        customer.id,
+      );
+      if (!proposal)
+        throw new HttpError(
+          409,
+          "This preview has expired. Generate a new preview before applying preferences.",
+        );
+      const pool = await candidatePool();
+      if (preferenceSnapshot(customer, pool) !== proposal.baseline)
+        throw new HttpError(
+          409,
+          "The profile or candidate pool changed. Generate a fresh preview before applying preferences.",
+        );
+      // Compare and swap prevents a late preview from overwriting a concurrent edit.
+      const result = await ProfileModel.updateOne(
+        { _id: customer.profile.id, "data.preferences": proposal.before },
+        {
+          $set: { "data.preferences": preferencesSchema.parse(proposal.after) },
+        },
+      );
+      if (!result.modifiedCount)
+        throw new HttpError(
+          409,
+          "Preferences changed. Generate a fresh preview before applying them.",
+        );
+      removePreferenceProposal(id);
+      await CustomerModel.updateOne(
+        { _id: customer.id, ownerId: req.session.userId },
+        { $set: { updatedAt: new Date() } },
+      );
+      res.json({ ok: true });
+    },
+  );
   app.post("/api/customers/:id/introductions", aiLimit, async (req, res) => {
     const { candidateId } = z
       .object({ candidateId: z.string().max(100) })

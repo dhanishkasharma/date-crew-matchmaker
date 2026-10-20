@@ -7,7 +7,7 @@ export function Brand({ light = false }: { light?: boolean }) {
     <div className={`brand ${light ? "brand-light" : ""}`}>
       <span className="brand-symbol">tdc</span>
       <div>
-        <strong>The Dating Company</strong>
+        <strong>The Date Crew</strong>
         <small>Matchmaker workspace</small>
       </div>
     </div>

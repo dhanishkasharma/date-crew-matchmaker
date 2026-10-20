@@ -5,7 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 const model =
   process.argv.find((arg) => arg.startsWith("--model="))?.slice(8) ||
   process.env.GEMINI_MODEL ||
-  "gemini-3.8-flash";
+  "gemini-3.5-flash-lite";
 if (!process.env.GEMINI_API_KEY) {
   console.info(JSON.stringify({ configured: false }));
   process.exit(1);
@@ -31,7 +31,7 @@ try {
     config: {
       responseMimeType: "application/json",
       maxOutputTokens: 100,
-      httpOptions: { timeout: 20000 },
+      httpOptions: { timeout: 20000, retryOptions: { attempts: 1 } },
     },
   });
   console.info(
@@ -39,27 +39,34 @@ try {
   );
 } catch (error) {
   const message = error instanceof Error ? error.message.toLowerCase() : "";
-  const category = message.includes("leaked")
-    ? "key_reported_leaked"
-    : message.includes("api_key_invalid") ||
-        message.includes("api key not valid")
-      ? "invalid_api_key"
-      : message.includes("expired")
-        ? "expired_credentials"
-        : message.includes("quota") || message.includes("resource_exhausted")
-          ? "quota_exhausted_or_unavailable"
-          : message.includes("not found") || message.includes("not_found")
-            ? "model_or_endpoint_unavailable"
-            : message.includes("permission") || message.includes("blocked")
-              ? "permission_or_key_restriction"
-              : "provider_request_failed";
+  const status = typeof error?.status === "number" ? error.status : null;
+  const category =
+    status === 408 ||
+    status === 504 ||
+    /deadline|timed? ?out|timeout/.test(message)
+      ? "provider_timeout"
+      : message.includes("leaked")
+        ? "key_reported_leaked"
+        : message.includes("api_key_invalid") ||
+            message.includes("api key not valid")
+          ? "invalid_api_key"
+          : (status === 401 || status === 403) && message.includes("expired")
+            ? "expired_credentials"
+            : message.includes("quota") ||
+                message.includes("resource_exhausted")
+              ? "quota_exhausted_or_unavailable"
+              : message.includes("not found") || message.includes("not_found")
+                ? "model_or_endpoint_unavailable"
+                : message.includes("permission") || message.includes("blocked")
+                  ? "permission_or_key_restriction"
+                  : "provider_request_failed";
   // These descriptors are derived from fixed checks; raw messages never leave memory.
   const quotaLimitZero = /limit[:\s]+0\b/.test(message);
   console.info(
     JSON.stringify({
       model,
       connected: false,
-      status: typeof error?.status === "number" ? error.status : null,
+      status,
       category,
       ...(category === "quota_exhausted_or_unavailable"
         ? { quotaLimitZero }

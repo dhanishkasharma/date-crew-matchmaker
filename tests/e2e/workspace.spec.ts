@@ -30,7 +30,7 @@ test("customer search, full biodata, notes, and a transparent shortlist", async 
     page.getByRole("heading", { name: "Suggested matches" }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Draft introduction", exact: true })
+    .getByRole("button", { name: "Send Match", exact: true })
     .first()
     .click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -60,4 +60,12 @@ test("mobile navigation and profile pool", async ({ page }) => {
     .getByRole("combobox", { name: "Filter profile pool by gender" })
     .selectOption("Female");
   await expect(page.getByText("100 profiles", { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 355, height: 844 });
+  await page.goto("/customers/customer-1?tab=matches");
+  await expect(
+    page.getByRole("heading", { name: "AI shortlist review", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(355);
 });

@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server-core";
 import supertest from "supertest";
@@ -8,6 +8,16 @@ import { DEMO_PASSWORD } from "../shared/seed";
 import type { Bootstrap } from "../shared/schema";
 import type { MatchReport } from "../shared/matching";
 import { config } from "../server/config";
+import { ProfileModel, NoteModel, SendModel } from "../server/models";
+import { refreshDemoText } from "../server/refresh-demo-text";
+import { LEGACY_BIO, LEGACY_CAREER_PRIORITY } from "../shared/seed";
+const { generateContent } = vi.hoisted(() => ({ generateContent: vi.fn() }));
+vi.mock("@google/genai", () => ({
+  ThinkingLevel: { LOW: "LOW" },
+  GoogleGenAI: class {
+    models = { generateContent };
+  },
+}));
 
 let mongo: MongoMemoryServer,
   app: ReturnType<typeof createApp>,
@@ -208,5 +218,125 @@ describe("authenticated MongoDB API", () => {
     );
     await second.post("/api/auth/logout").send({});
     expect((await second.get("/api/bootstrap")).status).toBe(401);
+  });
+  it("guards AI routes and keeps the rules available without a provider", async () => {
+    const aiAgent = supertest.agent(createApp());
+    await aiAgent
+      .post("/api/auth/login")
+      .send({ username: "priya", password: DEMO_PASSWORD });
+    expect(
+      (
+        await aiAgent
+          .post("/api/customers/customer-11/shortlist-review")
+          .send({})
+      ).status,
+    ).toBe(404);
+    expect(
+      (
+        await aiAgent
+          .post("/api/customers/customer-11/preference-proposals")
+          .send({ text: "Prefer ages 28 to 34" })
+      ).status,
+    ).toBe(404);
+    expect(
+      (
+        await aiAgent
+          .post(
+            "/api/customers/customer-11/preference-proposals/not-owned/apply",
+          )
+          .send({})
+      ).status,
+    ).toBe(404);
+    const review = await aiAgent
+      .post("/api/customers/customer-1/shortlist-review")
+      .send({});
+    expect(review.status).toBe(200);
+    expect(review.body.source).toBe("rules");
+    const proposal = await aiAgent
+      .post("/api/customers/customer-1/preference-proposals")
+      .send({ text: "Prefer ages 28 to 34" });
+    expect(proposal.status).toBe(200);
+    expect(proposal.body.status).toBe("unavailable");
+    expect(generateContent).not.toHaveBeenCalled();
+  });
+  it("does not persist previews and rejects stale or replayed applies", async () => {
+    const aiAgent = supertest.agent(createApp());
+    await aiAgent
+      .post("/api/auth/login")
+      .send({ username: "priya", password: DEMO_PASSWORD });
+    const before = (
+      (await aiAgent.get("/api/bootstrap")).body as Bootstrap
+    ).customers.find((c) => c.id === "customer-1")!.profile.preferences;
+    generateContent.mockResolvedValue({
+      text: JSON.stringify({
+        patch: { maxAge: 38 },
+        evidence: [{ field: "maxAge", quote: "Maximum age 38" }],
+        questions: [],
+        unsupported: [],
+      }),
+    });
+    config.geminiKey = "unit-test-only";
+    try {
+      const preview = await aiAgent
+        .post("/api/customers/customer-1/preference-proposals")
+        .send({ text: "Maximum age 38, keep all other preferences." });
+      expect(preview.status).toBe(200);
+      expect(preview.body.status).toBe("ready");
+      const saved = (
+        (await aiAgent.get("/api/bootstrap")).body as Bootstrap
+      ).customers.find((c) => c.id === "customer-1")!.profile.preferences;
+      expect(saved).toEqual(before);
+      await aiAgent
+        .patch("/api/customers/customer-1/preferences")
+        .send({ ...before, minAge: 26 });
+      expect(
+        (
+          await aiAgent
+            .post(
+              `/api/customers/customer-1/preference-proposals/${preview.body.proposalId}/apply`,
+            )
+            .send({})
+        ).status,
+      ).toBe(409);
+      const fresh = await aiAgent
+        .post("/api/customers/customer-1/preference-proposals")
+        .send({ text: "Maximum age 38, keep all other preferences." });
+      expect(fresh.body.status).toBe("ready");
+      const path = `/api/customers/customer-1/preference-proposals/${fresh.body.proposalId}/apply`;
+      expect(
+        (await aiAgent.post(path).send({ after: { maxAge: 80 } })).status,
+      ).toBe(200);
+      expect((await aiAgent.post(path).send({})).status).toBe(409);
+      const after = (
+        (await aiAgent.get("/api/bootstrap")).body as Bootstrap
+      ).customers.find((c) => c.id === "customer-1")!.profile.preferences;
+      expect(after).toEqual({ ...before, minAge: 26, maxAge: 38 });
+    } finally {
+      config.geminiKey = "";
+    }
+  });
+  it("refreshes only legacy demo text without resetting operational data", async () => {
+    const id = "pool-f-90";
+    await ProfileModel.updateOne(
+      { _id: id },
+      {
+        $set: {
+          "data.bio": LEGACY_BIO,
+          "data.careerPriority": LEGACY_CAREER_PRIORITY,
+          "data.preferences.minAge": 27,
+        },
+      },
+    );
+    const notes = await NoteModel.countDocuments(),
+      sends = await SendModel.countDocuments();
+    expect((await refreshDemoText()).fields).toBe(2);
+    expect((await ProfileModel.findById(id).lean())!.data.bio).toBe(LEGACY_BIO);
+    expect((await refreshDemoText(true)).fields).toBe(2);
+    const profile = (await ProfileModel.findById(id).lean())!.data;
+    expect(profile.bio).not.toBe(LEGACY_BIO);
+    expect(profile.preferences.minAge).toBe(27);
+    expect(await NoteModel.countDocuments()).toBe(notes);
+    expect(await SendModel.countDocuments()).toBe(sends);
+    expect((await refreshDemoText(true)).fields).toBe(0);
   });
 });

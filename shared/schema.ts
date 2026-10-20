@@ -3,25 +3,28 @@ import { stages } from "./constants";
 
 export const choiceSchema = z.enum(["Yes", "No", "Maybe"]);
 export const stageSchema = z.enum(stages);
-export const preferencesSchema = z
-  .object({
-    minAge: z.number().int().min(18).max(80),
-    maxAge: z.number().int().min(18).max(80),
-    strictAge: z.boolean(),
-    cities: z.array(z.string().min(1)).max(10),
-    strictLocation: z.boolean(),
-    maritalStatuses: z
-      .array(z.enum(["Never married", "Divorced", "Widowed"]))
-      .min(1),
-    diet: z.enum(["Any", "Vegetarian", "Non-vegetarian", "Vegan"]),
-    strictDiet: z.boolean(),
-    smoking: z.enum(["Any", "No", "Occasionally"]),
-    strictSmoking: z.boolean(),
-  })
-  .refine((v) => v.minAge <= v.maxAge, {
+const preferenceFields = z.object({
+  minAge: z.number().int().min(18).max(80),
+  maxAge: z.number().int().min(18).max(80),
+  strictAge: z.boolean(),
+  cities: z.array(z.string().min(1)).max(10),
+  strictLocation: z.boolean(),
+  maritalStatuses: z
+    .array(z.enum(["Never married", "Divorced", "Widowed"]))
+    .min(1),
+  diet: z.enum(["Any", "Vegetarian", "Non-vegetarian", "Vegan"]),
+  strictDiet: z.boolean(),
+  smoking: z.enum(["Any", "No", "Occasionally"]),
+  strictSmoking: z.boolean(),
+});
+export const preferencesPatchSchema = preferenceFields.partial().strict();
+export const preferencesSchema = preferenceFields.refine(
+  (v) => v.minAge <= v.maxAge,
+  {
     message: "Minimum age cannot exceed maximum age",
     path: ["maxAge"],
-  });
+  },
+);
 
 export const profileSchema = z.object({
   id: z.string(),

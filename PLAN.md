@@ -328,3 +328,90 @@ The following is intended submission language **after implementation and validat
 ## 13. Definition of done
 
 An evaluator can open the hosted link, sign in using the supplied credentials, inspect an assigned customer's complete profile, understand the shortlist and its tradeoffs, save a note, generate a real AI introduction, and record a mock send. Refreshing preserves the operational changes. The repository explains the architecture and matching policy clearly enough to discuss every consequential decision.
+
+## 14. Post-MVP assessment review — 20 October 2026
+
+Status: branding, Send Match, provider-neutral AI labels, shortlist review and natural-language preference preview/apply are implemented. Authored profile narratives, safe explicit legacy-text migration, validation/fallback tests and five isolated browser scenarios are also implemented. The new model default is gemini-3.5-flash-lite after successful live evaluation; the previously configured model returned provider timeouts. The optional persisted match-decision feature is deferred. Hosted rollout and release evidence are tracked in docs/DEPLOYMENT.md; the sections below retain the implementation requirements. The original acceptance checkboxes above must be reconciled with actual evidence before submission; an unchecked box is not by itself proof that a feature is absent.
+
+### What already meets the brief
+
+Login and ownership isolation, assigned customer lists, all requested biodata fields, journey updates, persistent notes, 100 candidates of each gender, male-specific eligibility, female preference compatibility, transparent reciprocal scores, editable Gemini introductions, persisted mock sends, public hosting, and an algorithm write-up are implemented. Existing fit reasons and scores are deterministic; they must not be described as AI-generated. Gemini is the actual provider, not OpenAI. The brief permits LLM use and does not require switching providers.
+
+The next iteration should demonstrate three distinct AI uses within the same workflow: shortlist ranking with explanations, natural-language reasoning about profile fit/preferences, and the existing email drafting. Additional AI calls should produce a useful decision aid, not merely repeat the score in different words.
+
+### A. Close concrete completeness gaps first
+
+- Correct the visible brand from "The Dating Company" to "The Date Crew" and check page metadata and repository copy for the same mismatch.
+- Expose a literal "Send Match" action on every eligible suggestion, opening the existing review/draft dialog. Preserve the explicit final "Send mock email" step and duplicate protection. Update browser selectors and walkthrough copy with the new label.
+- Keep the selected ivory/plum visual direction. Add new capabilities through the existing shortlist toolbar, candidate review panel, and preference editor; avoid another dashboard redesign or a generic chatbot page.
+- Improve fictional data deliberately: varied bios and career-priority statements consistent with structured fields, realistic tradeoffs, and clearly identified demonstration cases. The current shared bio cannot support meaningful semantic comparisons. Do not infer values from names, religion, caste, income, college, or profession.
+- Introduce fixtures covering a strong mutual fit, a strong one-sided fit, unresolved relocation, a children conflict, missing information, and a failed male-policy boundary. Keep bulk seed generation reproducible and add a few authored cases rather than a complicated synthetic-data system.
+- Apply any seed revision through an explicit, idempotent migration of known demo records. Never reset Atlas or erase existing notes/sends on startup. Document which demo records change.
+
+Exit: the required action is discoverable, branding matches the recipient, all required fields remain visible, and the walkthrough includes both a good fit and a meaningful exclusion/tradeoff.
+
+### B. AI shortlist review — ranking plus grounded explanations
+
+Add an on-demand "Review shortlist with Gemini" action. The server computes the eligible shortlist from current saved preferences, then sends only the first eight candidates and a minimal customer context in one bounded request. Review fewer when fewer are eligible; an empty pool does not call the model. Clearly label this as a review of eight candidates, not the entire pool.
+
+- Gemini returns a review order, a concise comparison summary, candidate-specific strengths, unresolved issues, and one useful discussion question. Each claimed strength/issue references server-issued evidence IDs from the supplied profile facts and matching report.
+- Return each reviewed candidate exactly once. Validate the allowed candidate IDs, evidence ownership, unique ordering, required fields, length bounds, and known unresolved conflicts. Reject invalid output rather than showing a partial or invented ranking.
+- Display the optional AI review order separately from the deterministic mutual-fit score and evidence coverage. Preserve a direct switch back to the default order. No invented success percentages or arbitrary blend of an LLM score with the existing index.
+- Preserve all server exclusion rules and uncertainty flags. Gemini cannot admit an excluded candidate, relax the assessment policy, erase a known conflict, or send a match. A useful recommendation can say "Discuss relocation first" despite a high numeric fit.
+- Give each review item a concise evidence panel: what both people stated, what is unresolved, and why the model suggests reviewing it in that position. Render referenced facts from canonical server data. Generated prose remains labeled AI interpretation; valid JSON and valid references alone do not prove every sentence is correct.
+- Allowlisted inputs include relevant declared values/interests, work schedule, career priorities, life plans, location options, and a bounded public bio after checking for contact details. Exclude contact fields, exact DOB, income, caste, religion, family wealth, and private notes. Include age-policy outcomes as already-computed facts if needed, without sending financial details.
+- A timeout, quota failure, missing key, or invalid response preserves the deterministic shortlist with an honest notice. Never present fallback copy as Gemini output.
+
+Exit: a real model request can compare eligible candidates, explain an order with inspectable facts, and identify a tradeoff; invalid IDs or unsupported evidence cannot enter the displayed review. A live failure leaves the current shortlist usable.
+
+### C. Natural-language preference assistant — interpret, preview, apply
+
+Extend the existing preference editor with a small "Describe preferences" input. Example: "Prefer ages 28–34, Bengaluru or Pune; non-smoking is a must." Gemini converts this into a bounded proposal using fields already supported by the preference schema.
+
+- Return a partial patch, references to the relevant input phrases, and unresolved/unsupported requests. Do not replace the full preference object or silently fill unspecified fields.
+- Show the exact before/after changes, distinguish firm requirements from flexible preferences, and compute the eligible-pool count before and after using the same pure matching engine. Mark results as a preview until saved.
+- Require an explicit "Apply preferences" action. Revalidate ownership, the current saved preferences, the proposal, and eligibility on the server. A stale preview must be refreshed rather than overwrite newer edits.
+- Ambiguous language should produce a question or an incomplete proposal, not a guess. Unsupported requests such as changing the assessment's male policy or filtering on inferred personality must be flagged without executing them.
+- Do not mine private meeting notes, alter profile biodata, or treat "flexible" as permission to remove an unrelated saved dealbreaker. Keep manual editing available if the provider is unavailable; do not fake successful parsing with an unlabeled keyword fallback.
+
+This feature supplies the third requested AI dimension through natural-language rule interpretation; the shortlist review supplies natural-language reasoning about pair fit as well. Neither feature creates an autonomous rule engine.
+
+Exit: the example yields an inspectable, correct patch and a pool-size preview; nothing persists before Apply; ambiguous or hostile text cannot change protected policy or trigger sends.
+
+### D. Make AI quality reviewable
+
+- Create a small authored evaluation set, approximately 12–16 cases, with independently specified expected behavior. Include clear compatibility, contradictory life plans, bilateral preferences, partial information, ambiguous language, unsupported attributes, prompt injection in profile text, and attempts to override hard eligibility.
+- Mock provider boundaries in CI to test malformed output, unknown/duplicate candidate IDs, invalid evidence references, stale reviews/previews, quota errors, and timeouts. These tests verify application behavior, not real model quality.
+- Run an explicit, opt-in live evaluation against the same fixtures using the configured key. Record model/prompt version, date, counts, validation failures, latency, and a human review of factual support and useful tradeoffs. Report actual results; synthetic cases are not evidence of relationship success or production recommendation accuracy.
+- Reuse reviews only when their owner/customer scope and hash of the exact model input, policy version, prompt version, and model match. Deduplicate simultaneous identical requests. A small bounded in-process cache is enough initially; no Redis, queues, or external cache service. Preference or profile changes invalidate a displayed review.
+- Share one server-side Gemini request/validation helper where the three actual use cases repeat code. Keep separate schemas/prompts and focused modules for introductions, shortlist review, and preference proposals. No orchestration framework, vector database, embeddings, or autonomous agents.
+- Apply one shared per-user AI budget to all new endpoints, bound input/output sizes and execution time, and provide visible retry behavior. Log safe operational metadata only. Make no promise about free-tier capacity; verify available quota before the final demonstration.
+
+Exit: the submission includes repeatable behavioral checks, an honest live-evaluation summary, and a clear account of what AI can and cannot change.
+
+### E. One small operational differentiator, if the release gates are green
+
+Add a persisted matchmaker decision per customer/candidate: Shortlisted, Hold, or Declined, with an optional short reason and timestamp. Support editing/clearing it, display it in activity, and keep it distinct from the existing sent state. This makes the tool useful between recommendation and introduction. Do not automatically train or alter global weights from a few fictional decisions.
+
+This follows the two requested AI additions and is the first feature to drop if it risks the exercise deadline. Do not add scheduling, real emails, chat, billing, full customer CRUD, or an admin system for this iteration.
+
+### F. Release and submission evidence
+
+- Run the existing checks plus targeted tests for the new rules, schemas, ownership checks, stale state, and fallbacks. Run and fix the supplied Playwright suite against isolated demo data; it was previously supplied but not executed automatically. Expand it to cover Send Match, persisted mock delivery, the preference preview/apply boundary, and visible AI fallback states with controlled provider responses.
+- Test keyboard operation, long content, dialogs, empty/no-eligible results, and narrow screens for each added panel. Keep controls visible and use plain language rather than adding decorative AI icons.
+- Reconcile the acceptance checklist from current evidence, update the required 2–3 paragraph algorithm write-up to describe only shipped behavior, and retain research links with a short explanation of resulting product choices.
+- Deploy the finished release to Render/Vercel and verify both demo accounts, direct-route refresh, saved notes/preferences/decisions, one mock send, and each live AI action. Preserve the previous working release as the rollback reference.
+- Prepare a 3–5 minute recording and a short evaluator guide: female customer -> fit versus tradeoff -> AI shortlist review -> natural-language preference preview -> male-policy example -> Gemini introduction -> mock send -> refresh -> second account isolation. Keep steps concise enough for the stated recording length.
+- Prepare the submission email with the live URL, repository URL, demo credentials, required write-up, and resume/portfolio. Use subject "Full Stack Developer Internship – Dhanishka Sharma – Assignment" after confirming the resume's preferred name. Draft only; sending email requires an explicit instruction from the user. Never fabricate a portfolio or attach an assumed resume.
+
+### Delivery sequence and scope guard
+
+1. Completeness fixes and authored demo/evaluation cases.
+2. AI shortlist review, with evidence validation and fallback, delivered as one working slice.
+3. Natural-language preference preview/apply, with tests, delivered as one working slice.
+4. Optional persisted match decisions only if the required slices and verification pass.
+5. Automated browser checks, actual live evaluation, hosted verification, and submission package.
+
+Keep the same MERN deployment and a small number of cohesive modules. No framework migration or infrastructure expansion is required. Work within the original two-day deadline; its receipt time is not established by this review. The goal is demonstrable correctness, useful AI, and decisions the candidate can explain in an interview. Interview selection cannot be guaranteed.
+
+Technical reference rechecked on 20 October 2026: [Gemini structured outputs](https://ai.google.dev/gemini-api/docs/structured-output). The provider documents JSON Schema support and explicitly requires application validation and handling of semantically incorrect output. [Hinge's preference guidance](https://help.hinge.co/hc/en-us/articles/360011063294-How-do-I-change-my-Preferences) distinguishes flexible preferences; this supports our explicit preview of firm versus flexible criteria, rather than silently broadening the pool.

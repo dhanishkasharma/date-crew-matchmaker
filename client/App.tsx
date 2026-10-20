@@ -249,9 +249,17 @@ export function App() {
             </p>
             <h3>Reviewed introductions</h3>
             <p>
-              Gemini drafts an introduction from selected profile facts. Review
-              and edit the text before recording a mock email. Compatibility
-              indices are not probabilities of relationship success.
+              AI drafts an introduction from selected profile facts. Review and
+              edit the text before recording a mock email. Compatibility indices
+              are not probabilities of relationship success.
+            </p>
+            <h3>AI assistance, with your review</h3>
+            <p>
+              Review with AI compares eight eligible candidates and highlights
+              saved evidence. You can switch between its suggested review order
+              and mutual-fit order. Describe with AI previews preference
+              changes; nothing is saved until you apply them. Firm eligibility
+              rules stay in place.
             </p>
             <span className="subtle-chip">Policy tdc-1.0</span>
           </div>

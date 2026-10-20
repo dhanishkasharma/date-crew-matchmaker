@@ -110,6 +110,27 @@ const allValues = [
   "Shared responsibilities",
   "Curiosity",
 ];
+export const LEGACY_BIO =
+  "A little ambitious, a little old-school. I value honest conversations, showing up for people, and making space for the small joys in everyday life.";
+export const LEGACY_CAREER_PRIORITY =
+  "Growing a meaningful career while making time for family.";
+
+// Text is derived from declared fields so the fictional narrative never contradicts biodata.
+function addNarrative(p: Profile) {
+  p.careerPriority =
+    p.workStyle === "Variable hours"
+      ? "My work hours vary. Planning time together in advance helps me protect both my career and my personal life."
+      : p.workStyle === "Regular hours"
+        ? "I value a steady work routine and making time for family and shared responsibilities outside work."
+        : "Flexibility in my work matters to me. I want both partners to have room to grow in their careers.";
+  const children =
+    p.wantKids === "Yes"
+      ? "I would like children in the future."
+      : p.wantKids === "No"
+        ? "I do not plan to have children."
+        : "I am still considering what having children would mean for me.";
+  p.bio = `I live in ${p.city} and work as a ${p.designation.toLowerCase()}. Outside work, I enjoy ${p.interests.map((v) => v.toLowerCase()).join(", ")}. ${children} ${p.relocate === "No" ? "I hope to build a life in my current city." : p.relocate === "Yes" ? `I would consider moving to ${p.relocationCities.join(" or ")}.` : "Relocation would need a conversation about both our plans."}`;
+}
 let seed = 42;
 function random() {
   seed ^= seed << 13;
@@ -241,6 +262,8 @@ export function createSeed() {
     city: "Bengaluru",
     designation: "Product Designer",
     company: "Studio North",
+    degree: "B.Des",
+    college: "NID Ahmedabad",
     income: 2800000,
     height: 165,
     wantKids: "Yes",
@@ -313,7 +336,10 @@ export function createSeed() {
     "Closed",
     "Shortlisting",
   ];
-  [...candidates, ...clients].forEach((p) => profileSchema.parse(p));
+  [...candidates, ...clients].forEach((p) => {
+    addNarrative(p);
+    profileSchema.parse(p);
+  });
   return {
     candidates,
     clients,

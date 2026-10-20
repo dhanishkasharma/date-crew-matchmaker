@@ -22,10 +22,20 @@ Authentication uses an HttpOnly SameSite cookie, session regeneration at login, 
 - A native database uniqueness constraint prevents duplicate sends. There is no real email transport, signup, identity verification, or customer-import system.
 - The development MongoDB launcher is genuine MongoDB with disk persistence; Atlas configuration is explicit for hosting. Development dependencies are not an operational hosted database strategy.
 - Bootstrap is intentionally simple. A larger deployment would paginate/filter the pool at the API, avoid sending unnecessary contact data, and cache recommendations by profile/policy version.
-- Compatibility rules and missing-data handling are deterministic. LLM output is text assistance, requiring review. Structured format is not factual proof.
+- Compatibility rules and missing-data handling are deterministic. AI can suggest a separate review order, propose supported preference changes and draft text. It cannot change eligibility or send a match. Structured format and valid evidence references are not factual proof of the generated prose.
+
+## AI boundaries
+
+`server/ai.ts` owns the provider call, structured parsing, safe diagnostics and bounded execution. Separate modules own introduction drafting, shortlist review and preference proposals; `shared/ai.ts` defines their response contracts. The frontend uses provider-neutral "AI" labels. No new provider, agent framework or external infrastructure is needed.
+
+Shortlist review takes the server's top eight eligible candidates. It validates exact membership, unique ordering and evidence references scoped to the relevant pair. Returned facts and unresolved concerns come from canonical data, not model-written copies. A bounded process-local cache shares identical in-flight/successful reviews for ten minutes; its key includes owner/customer scope, exact input, model, prompt and matching-policy version. Context changes invalidate both the cache key and the displayed review.
+
+The model selects evidence IDs and a review order; the server builds each candidate explanation from the selected facts' actual alignment/discussion states. Candidate-specific free-form rationale is deliberately absent from the provider schema. A visual QA pass caught an unsupported schedule comparison in an early free-form rationale; this narrower contract removes that failure mode from the displayed explanation. The overall summary and discussion questions remain model-generated and require review.
+
+Preference interpretation takes only the typed request, saved preferences and allowed city names. It returns a strict partial patch with exact input quotes, questions and unsupported requests. Ready proposals live in a bounded process-local store for fifteen minutes. Apply accepts the opaque proposal ID, checks its owner/customer and profile/pool snapshot, and uses a database compare-and-swap against the original preferences. Client-supplied replacement values cannot alter the stored proposal. Restarts discard previews; the UI asks for a fresh one. Manual editing remains independent. Shared per-user AI rate limiting covers all three features; SDK automatic retries are disabled so provider overload does not turn a short UI request into minutes of waiting.
 
 ## Validation
 
-Vitest covers matching boundaries and the Gemini integration boundary with mocked provider calls. Supertest exercises auth, ownership, persistence, and sends against real ephemeral MongoDB, separate from app data. Playwright scenarios are supplied for repeatable browser checks. Browser QA also inspects the visual layout and full workflow.
+Vitest covers matching boundaries and all three AI boundaries with mocked provider calls. Supertest exercises auth, ownership, persistence, stale/replayed proposals and sends against real ephemeral MongoDB. Playwright now runs five scenarios against its own ephemeral database and ports 4100/5174, without reading the real API key or writing to Atlas. Controlled AI responses exercise successful UI flows; the real endpoints exercise fallback and persistence. The opt-in live evaluation is separate and records actual provider results in docs/AI-EVALUATION.json.
 
 External account configuration, live Gemini quota, and deployment remain separate checks. Never label fallback text as AI-generated or report a hosted URL before deployment succeeds.

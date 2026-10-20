@@ -92,7 +92,7 @@ export function IntroductionDialog({
         </dl>
         <div className="ai-draft-panel">
           <div>
-            <strong>Personalize with Gemini</strong>
+            <strong>Personalize with AI</strong>
             <p>
               Draft an introduction using shared interests and compatibility.
             </p>
@@ -102,19 +102,19 @@ export function IntroductionDialog({
             onClick={generate}
             disabled={!!busy || !aiConfigured}
           >
-            {busy === "ai" ? "Generating draft…" : "Generate with Gemini"}
+            {busy === "ai" ? "Generating draft…" : "Generate with AI"}
           </button>
         </div>
         {!aiConfigured && (
           <p className="inline-notice small">
-            Gemini is not connected. A template is available for review.
+            AI is not connected. A template is available for review.
           </p>
         )}
         <div className="draft-toolbar">
           <span
             className={`draft-label ${draft.source === "gemini" ? "ai" : ""}`}
           >
-            {draft.source === "gemini" ? "Gemini draft" : "Template draft"}
+            {draft.source === "gemini" ? "AI draft" : "Template draft"}
             {edited ? " · Edited" : ""}
           </span>
           <span>Review before sending</span>
