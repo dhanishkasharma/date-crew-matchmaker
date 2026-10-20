@@ -263,6 +263,7 @@ export function createApp() {
         createdAt: s.createdAt.toISOString(),
       })),
       aiConfigured: !!config.geminiKey,
+      aiAssistanceAvailable: true,
       storage: config.mongoUri ? "atlas" : "local",
     });
   });

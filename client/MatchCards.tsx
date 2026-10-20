@@ -36,6 +36,7 @@ export function MatchCards({
   report,
   sends,
   aiConfigured,
+  aiAssistanceAvailable,
   reload,
   notify,
 }: {
@@ -43,6 +44,7 @@ export function MatchCards({
   report: MatchReport;
   sends: SendRecord[];
   aiConfigured: boolean;
+  aiAssistanceAvailable: boolean;
   reload: () => Promise<void>;
   notify: (message: string) => void;
 }) {
@@ -123,19 +125,21 @@ export function MatchCards({
           High potential only
         </label>
       </div>
-      <ShortlistReviewPanel
-        report={report}
-        review={review}
-        busy={reviewBusy}
-        error={reviewError}
-        configured={aiConfigured}
-        aiOrder={aiOrder}
-        generate={() => void generateReview()}
-        changeOrder={(value) => {
-          setAiOrder(value);
-          setLimit(6);
-        }}
-      />
+      {aiAssistanceAvailable && (
+        <ShortlistReviewPanel
+          report={report}
+          review={review}
+          busy={reviewBusy}
+          error={reviewError}
+          configured={aiConfigured}
+          aiOrder={aiOrder}
+          generate={() => void generateReview()}
+          changeOrder={(value) => {
+            setAiOrder(value);
+            setLimit(6);
+          }}
+        />
+      )}
       {!canSend && (
         <p className="inline-notice">
           Introductions are paused. Review this customer’s verification and

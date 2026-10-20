@@ -3,6 +3,13 @@ import { expect, test } from "@playwright/test";
 test("customer search, full biodata, notes, and a transparent shortlist", async ({
   page,
 }) => {
+  // Keep the core workflow usable while Vercel and Render roll out separately.
+  await page.route("**/api/bootstrap", async (route) => {
+    const response = await route.fetch();
+    const data = await response.json();
+    delete data.aiAssistanceAvailable;
+    await route.fulfill({ response, json: data });
+  });
   await page.goto("/");
   await page.getByLabel("Username", { exact: true }).fill("priya");
   await page.getByLabel("Password", { exact: true }).fill("TdcDemo2026!");
@@ -29,6 +36,9 @@ test("customer search, full biodata, notes, and a transparent shortlist", async 
   await expect(
     page.getByRole("heading", { name: "Suggested matches" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "AI shortlist review" }),
+  ).not.toBeVisible();
   await page
     .getByRole("button", { name: "Send Match", exact: true })
     .first()

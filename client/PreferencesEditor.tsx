@@ -10,11 +10,13 @@ export function PreferencesEditor({
   close,
   saved,
   aiConfigured,
+  aiAssistanceAvailable,
 }: {
   customer: Customer;
   close: () => void;
   saved: () => Promise<void>;
   aiConfigured: boolean;
+  aiAssistanceAvailable: boolean;
 }) {
   const [form, setForm] = useState(
       structuredClone(customer.profile.preferences),
@@ -42,26 +44,28 @@ export function PreferencesEditor({
       subtitle={`Partner preferences for ${customer.profile.firstName}. Strict preferences are never relaxed automatically.`}
       onClose={close}
     >
-      <div
-        className="preference-mode segmented-control"
-        aria-label="Preference editor mode"
-      >
-        <button
-          aria-pressed={mode === "manual"}
-          onClick={() => setMode("manual")}
-          disabled={busy}
+      {aiAssistanceAvailable && (
+        <div
+          className="preference-mode segmented-control"
+          aria-label="Preference editor mode"
         >
-          Manual preferences
-        </button>
-        <button
-          aria-pressed={mode === "ai"}
-          onClick={() => setMode("ai")}
-          disabled={busy}
-        >
-          Describe with AI
-        </button>
-      </div>
-      {mode === "ai" ? (
+          <button
+            aria-pressed={mode === "manual"}
+            onClick={() => setMode("manual")}
+            disabled={busy}
+          >
+            Manual preferences
+          </button>
+          <button
+            aria-pressed={mode === "ai"}
+            onClick={() => setMode("ai")}
+            disabled={busy}
+          >
+            Describe with AI
+          </button>
+        </div>
+      )}
+      {mode === "ai" && aiAssistanceAvailable ? (
         <PreferenceAssistant
           customer={customer}
           configured={aiConfigured}

@@ -111,6 +111,7 @@ export type Bootstrap = {
   notes: Note[];
   sends: Send[];
   aiConfigured: boolean;
+  aiAssistanceAvailable?: boolean;
   storage: "atlas" | "local";
 };
 export const introSchema = z.object({

@@ -57,6 +57,7 @@ describe("authenticated MongoDB API", () => {
     const data = bootstrap.body as Bootstrap;
     expect(data.customers).toHaveLength(10);
     expect(data.candidates).toHaveLength(200);
+    expect(data.aiAssistanceAvailable).toBe(true);
     expect(data.customers.every((c) => c.ownerId === "matchmaker-1")).toBe(
       true,
     );

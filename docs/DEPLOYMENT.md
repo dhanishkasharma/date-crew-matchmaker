@@ -60,6 +60,12 @@ The 20 October enhancement release needs no new environment variables or databas
 
 The explicit legacy-text migration was applied to the configured Atlas database on 20 October: 424 legacy text fields were replaced across the 212 seeded profiles. Operational records and preferences were preserved. Set the existing `GEMINI_MODEL` environment variable to `gemini-3.5-flash-lite` for the enhancement release; the same existing key is used.
 
+## Enhancement rollout status — 20 October 2026
+
+The implementation is pushed and GitHub Actions passed [MVP checks](https://github.com/dhanishkasharma/date-crew-matchmaker/actions/runs/39376619884) for the feature commit. Vercel serves the updated frontend. The Render API still requires a manual deployment and its existing model setting must be updated. The attached Chrome connection is unavailable in the current session; the in-app browser reaches Render's sign-in screen. The new frontend checks the API capability before showing the new controls so the earlier API remains usable during rollout.
+
+To finish from the logged-in Render dashboard: open the existing `date-crew-matchmaker-api` service, set `GEMINI_MODEL` to `gemini-3.5-flash-lite` in Environment, save, and use Manual Deploy → Deploy latest commit from main. No new secrets are required. After Live, sign out/in or refresh the Vercel app, confirm `aiAssistanceAvailable: true` in authenticated bootstrap, and verify Review with AI, Describe with AI preview and Generate with AI. Do not mark hosted AI verification complete until these checks pass.
+
 Render's free service can spin down when idle, so the first request may be slow. Data and sessions remain in Atlas. All customer profiles and sends in this assessment are fictional or simulated.
 
 References: [Vercel external rewrites](https://vercel.com/docs/routing/rewrites), [Render Node version selection](https://render.com/docs/node-version), [Render free service behavior](https://render.com/docs/free).

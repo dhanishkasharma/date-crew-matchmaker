@@ -268,6 +268,7 @@ export function CustomerView({
             report={report}
             sends={sends}
             aiConfigured={data.aiConfigured}
+            aiAssistanceAvailable={data.aiAssistanceAvailable === true}
             reload={reload}
             notify={notify}
           />
@@ -304,6 +305,7 @@ export function CustomerView({
           key={customer.id}
           customer={customer}
           aiConfigured={data.aiConfigured}
+          aiAssistanceAvailable={data.aiAssistanceAvailable === true}
           close={() => setPreferencesOpen(false)}
           saved={async () => {
             await reload();
