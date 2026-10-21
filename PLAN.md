@@ -1,6 +1,6 @@
 # TDC Matchmaker Dashboard — MVP implementation plan
 
-Status: local MVP implemented on 19 October 2026 in C:\Users\saara\Matchmaker. Approved stack: MERN + TypeScript + Gemini free-tier API. Login, dashboard, full profiles, preferences, matching, notes, and mock introductions are implemented. Configured MongoDB access and live Gemini introductions with gemini-3.8-flash are verified. GitHub publication, the Vercel frontend and the Render API are complete; public login, session refresh, assignment isolation, Atlas connectivity and live Gemini drafting are verified. See docs/DEPLOYMENT.md for the live URLs. See README.md for validation evidence and docs/SETUP.md for account configuration.
+Status: the MVP and AI enhancements are implemented in C:\Users\saara\Matchmaker and hosted on Vercel/Render. Approved stack: MERN + TypeScript + Gemini free-tier API, with provider-neutral AI labels in the UI. Login, full profiles, preferences, matching, notes, mock introductions, AI shortlist review and natural-language preference previews are implemented. On 21 October 2026 the updated Render API and model configuration were deployed; all three hosted AI actions, login/session refresh, assignment isolation and Atlas connectivity were verified. See docs/DEPLOYMENT.md for live URLs and release evidence, README.md for checks, and docs/SETUP.md for configuration.
 
 ## Approved stack decisions
 

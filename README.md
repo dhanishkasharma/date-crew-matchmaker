@@ -2,7 +2,7 @@
 
 A polished MERN assessment MVP for customer care, explainable shortlists, meeting notes, and reviewed introductions.
 
-![Hosted matchmaker workspace](docs/screenshots/live-dashboard.png)
+![Hosted AI shortlist review](docs/screenshots/hosted-ai-shortlist.png)
 
 ## Deployment
 
@@ -10,7 +10,7 @@ A polished MERN assessment MVP for customer care, explainable shortlists, meetin
 - API: [date-crew-matchmaker-api.onrender.com/api/health](https://date-crew-matchmaker-api.onrender.com/api/health)
 - Source: [dhanishkasharma/date-crew-matchmaker](https://github.com/dhanishkasharma/date-crew-matchmaker)
 
-The frontend and API are live. Production login, session refresh, assignment isolation, Atlas data and Gemini draft generation have been verified. See [deployment instructions](docs/DEPLOYMENT.md).
+The frontend and API are live, including all three AI actions. On 21 October 2026, hosted shortlist review, natural-language preference preview, introduction generation, session refresh and both accounts' assignment isolation were verified. See [deployment verification](docs/DEPLOYMENT.md).
 
 ## Run
 
@@ -69,17 +69,19 @@ rtk npm run build
 6. Open Send Match, choose Generate with AI, review the editable draft, and record a mock email.
 7. Refresh to confirm the candidate remains Sent; inspect Notes & activity. Open Arjun's shortlist to explain the male-policy differences. Sign in as Rohan to demonstrate assignment isolation.
 
-## AI enhancement verification — 20 October 2026
+## AI enhancement verification — 20–21 October 2026
 
 The interface uses provider-neutral AI labels. The provider remains server-side Gemini; `gemini-3.5-flash-lite` passed the live shortlist/preference evaluation and is the new default after the previously configured model returned repeated 503/504 errors. No additional API key, database collection or paid service is required. Review exact results and limitations in [AI evaluation](docs/AI-EVALUATION.md).
 
 66 unit/API tests and five isolated browser scenarios pass. The four live AI evaluation cases pass with the configured replacement model. The local browser walkthrough also verified a real preference preview with before/after pool counts; no preference changes were applied during that walkthrough. Type checking, lint, formatting and the production build are release gates.
 
+The enhancement API was deployed to Render on 21 October, with its existing model setting updated. The public Vercel app now exposes Review with AI and Describe with AI. All three live AI flows passed in the hosted browser; preference and email previews were cancelled to preserve the demo. Refresh retained the protected customer route. Priya/Rohan still see 10/2 assigned customers, respectively, and cross-owner access returns 404.
+
 Run `npm run evaluate:ai -- --live` explicitly to repeat the four fictional-fixture checks using your configured quota. This does not write to the database. Run `npm run demo:refresh-text` for a dry run of the legacy bio/career-text migration; add `-- --apply` to update only recognized legacy text. Existing notes, sends and preferences are preserved.
 
 ![AI evidence review](docs/screenshots/ai-review-evidence.png)
 
-![AI preference preview](docs/screenshots/ai-preferences.png)
+![Hosted AI preference preview](docs/screenshots/hosted-ai-preferences.png)
 
 ## Current external setup
 

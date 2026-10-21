@@ -60,11 +60,19 @@ The 20 October enhancement release needs no new environment variables or databas
 
 The explicit legacy-text migration was applied to the configured Atlas database on 20 October: 424 legacy text fields were replaced across the 212 seeded profiles. Operational records and preferences were preserved. Set the existing `GEMINI_MODEL` environment variable to `gemini-3.5-flash-lite` for the enhancement release; the same existing key is used.
 
-## Enhancement rollout status — 20 October 2026
+## Enhancement rollout verified — 21 October 2026
 
-The implementation is pushed and GitHub Actions passed [MVP checks](https://github.com/dhanishkasharma/date-crew-matchmaker/actions/runs/39376619884) for the feature commit. Vercel serves the updated frontend. The Render API still requires a manual deployment and its existing model setting must be updated. The attached Chrome connection is unavailable in the current session; the in-app browser reaches Render's sign-in screen. The new frontend checks the API capability before showing the new controls so the earlier API remains usable during rollout.
+The updated frontend and API are live. Render successfully deployed application commit `a6528ed2938f5ba8f421b45030417ef667fb8d31` using Node.js 22.22.0; its existing `GEMINI_MODEL` setting is now `gemini-3.5-flash-lite`. The existing API key, Atlas connection and session secret are preserved. The successful [Render deployment](https://dashboard.render.com/web/srv-dbb1gn49v7es73abnc20/deploys/dep-dbc51a5g1s2s7393313g) completed its health check and is Live. [GitHub checks](https://github.com/dhanishkasharma/date-crew-matchmaker/actions/runs/39376998823) passed for this application commit. Later documentation-only commits do not require another API deployment.
 
-To finish from the logged-in Render dashboard: open the existing `date-crew-matchmaker-api` service, set `GEMINI_MODEL` to `gemini-3.5-flash-lite` in Environment, save, and use Manual Deploy → Deploy latest commit from main. No new secrets are required. After Live, sign out/in or refresh the Vercel app, confirm `aiAssistanceAvailable: true` in authenticated bootstrap, and verify Review with AI, Describe with AI preview and Generate with AI. Do not mark hosted AI verification complete until these checks pass.
+Verified through the public Vercel origin:
+
+- API health, both demo logins and bootstrap returned HTTP 200. Priya received 10 customers, Rohan 2, and both received 200 candidates. Rohan's request for Priya's customer returned 404.
+- Authenticated bootstrap reports `aiConfigured: true` and `aiAssistanceAvailable: true`, so the new controls are enabled. A browser refresh retained the session and the direct customer route.
+- Review with AI successfully returned an eight-candidate review with ordering controls and saved profile evidence.
+- Describe with AI interpreted the example age/city/non-smoking request and showed a preview of 64 eligible profiles becoming 39. It remained labeled Not saved and was cancelled without applying changes.
+- Generate with AI produced an editable AI draft in Send Match. The draft was cancelled; no new mock email was recorded.
+
+Current hosted evidence: [AI shortlist](screenshots/hosted-ai-shortlist.png), [preference preview](screenshots/hosted-ai-preferences.png), and [AI introduction](screenshots/hosted-ai-introduction.png). The optional capability field remains in place so future independent frontend/API rollouts keep the earlier workflow usable.
 
 Render's free service can spin down when idle, so the first request may be slow. Data and sessions remain in Atlas. All customer profiles and sends in this assessment are fictional or simulated.
 
